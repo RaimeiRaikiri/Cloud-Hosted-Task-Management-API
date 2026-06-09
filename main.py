@@ -14,21 +14,21 @@ class Task(BaseModel):
     title: str = None
     description: str = None
     completed: bool = None
-    create_at: str = None
+    created_at: str|None = None
     
 task_one = Task(
     id=5,
     title="test1",
     description="testing time",
     completed=False,
-    create_at=""
+    created_at=""
 )
 task_two = Task(
     id=3,
     title="test2",
     description="testing time",
     completed=False,
-    create_at=""
+    created_at=""
 )
 
 # Temp list for the tasks    
@@ -58,21 +58,24 @@ def init_db():
 init_db()
 
 @app.get("/tasks", response_model=list[Task])
-def get_tasks():
-    if len(tasks) > 0:
+def get_tasks(db: Session = Depends(get_db)):
+    
+    number_of_tasks = db.query(database_models.Task).count()
+    
+    if number_of_tasks > 0:
+        db_tasks = db.query(database_models.Task).all()
         
-        return tasks
+        return db_tasks
     else:
-        raise HTTPException(
-            status_code=404, 
-            detail="There are no tasks found"
-        )
+        return []
     
 @app.get("/tasks/{task_id}", response_model=Task)
-def get_task(task_id: int):
-    if tasks[task_id]:
+def get_task(task_id: int, db: Session = Depends(get_db)):
+    task_in_db = db.query(database_models.Task).filter(database_models.Task.id == task_id).first()
+    
+    if task_in_db:
         
-        return tasks[task_id]
+        return task_in_db
     else:
         raise HTTPException(
             status_code=404,
@@ -80,17 +83,26 @@ def get_task(task_id: int):
         )
     
 @app.post("/tasks", status_code=status.HTTP_201_CREATED, response_model=Task)
-def create_task(task: Task):
-    tasks.append(task)
+def create_task(task: Task, db: Session = Depends(get_db)):
+    db.add(database_models.Task(**task.model_dump()))
+    db.commit()
+    
     return task
     
 @app.put("/tasks/{task_id}", response_model=Task)
-def update_task(task_id: int, task: Task):
+def update_task(task_id: int, task: Task, db: Session = Depends(get_db)):
     try:
-        if tasks[task_id]:
-            tasks[task_id] = task
+        task_in_db = db.query(database_models.Task).filter(database_models.Task.id == task_id).first()
+        if task_in_db:
             
-            return task
+            task_in_db.title = task.title
+            task_in_db.description = task.description
+            task_in_db.completed = task.completed
+            task_in_db.created_at = task.created_at
+            
+            db.commit()
+            
+            return task_in_db
             
     except:
         raise HTTPException(
@@ -99,10 +111,12 @@ def update_task(task_id: int, task: Task):
         )
     
 @app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(task_id: int):
+def delete_task(task_id: int, db: Session = Depends(get_db)):
     try:
-        if tasks[task_id]:
-            tasks[task_id] = None
+        task_in_db = db.query(database_models.Task).filter(database_models.Task.id == task_id).first()
+        if task_in_db:
+            db.delete(task_in_db)
+            db.commit()
             
             return None
     except:
