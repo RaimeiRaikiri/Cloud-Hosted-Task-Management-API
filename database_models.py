@@ -10,5 +10,5 @@ class Task(Base):
     title = Column(String)
     description = Column(String)
     completed = Column(Boolean)
-    create_at = Column(String)
+    created_at = Column(String)
    
