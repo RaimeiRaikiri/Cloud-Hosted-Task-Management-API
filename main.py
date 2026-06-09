@@ -1,6 +1,12 @@
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from datetime import datetime
+from database import session, engine
+import database_models
+
+app = FastAPI()
+
+database_models.Base.metadata.create_all(bind=engine)
 
 class Task(BaseModel):
     id: int = None
@@ -27,7 +33,13 @@ task_two = Task(
 # Temp list for the tasks    
 tasks = [task_one, task_two]
 
-app = FastAPI()
+
+
+@app.get("/")
+def root():
+    db = session()
+    db.query()
+    return tasks
 
 @app.get("/tasks", response_model=list[Task])
 def get_tasks():
