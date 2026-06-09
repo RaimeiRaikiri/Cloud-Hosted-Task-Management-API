@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Depends
 from pydantic import BaseModel
 from datetime import datetime
 from database import session, engine
 import database_models
+from sqlalchemy.orm import Session
 
 app = FastAPI()
 
@@ -13,33 +14,48 @@ class Task(BaseModel):
     title: str = None
     description: str = None
     completed: bool = None
-    create_at: None = None
+    create_at: str = None
     
 task_one = Task(
     id=5,
     title="test1",
     description="testing time",
     completed=False,
-    create_at=None
+    create_at=""
 )
 task_two = Task(
     id=3,
     title="test2",
     description="testing time",
     completed=False,
-    create_at=None
+    create_at=""
 )
 
 # Temp list for the tasks    
 tasks = [task_one, task_two]
 
-
-
-@app.get("/")
-def root():
+def get_db():
     db = session()
-    db.query()
-    return tasks
+    try:
+        yield db
+    # Close the connection to db regardless of yield outcome 
+    finally:
+        db.close()
+        
+# Inital testing data into db
+def init_db():
+    db = session()
+    
+    count = db.query(database_models.Task).count()
+    
+    if count == 0:
+        for task in tasks:
+            db.add(database_models.Task(**task.model_dump()))
+        
+        db.commit()
+        db.close()
+
+init_db()
 
 @app.get("/tasks", response_model=list[Task])
 def get_tasks():
@@ -66,7 +82,6 @@ def get_task(task_id: int):
 @app.post("/tasks", status_code=status.HTTP_201_CREATED, response_model=Task)
 def create_task(task: Task):
     tasks.append(task)
-    
     return task
     
 @app.put("/tasks/{task_id}", response_model=Task)
