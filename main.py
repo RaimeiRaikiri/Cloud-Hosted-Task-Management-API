@@ -23,9 +23,9 @@ class TaskResponse(BaseModel):
     title: str
     description: str
     completed: bool
-    created_at: str|None = None
+    created_at: str | None = None
     
-    user_id: int|None = None
+    user_id: int | None = None
 
 class UserCreate(BaseModel):
     username: str
