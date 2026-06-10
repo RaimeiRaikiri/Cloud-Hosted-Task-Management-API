@@ -4,9 +4,9 @@ from datetime import datetime
 from database import session, engine
 import database_models
 from sqlalchemy.orm import Session
-from auth import router, get_password_hash
+from auth import router, get_password_hash, get_current_active_user
 from database import get_db
-from models import UserCreate, TaskCreate, TaskResponse, TaskUpdate
+from models import UserCreate, TaskCreate, TaskResponse, TaskUpdate, User
 
 app = FastAPI()
 app.include_router(router)
@@ -43,6 +43,7 @@ def init_db():
 
 init_db()
 
+# Users
 @app.post("/users", status_code=status.HTTP_201_CREATED)
 def register_user(new_user: UserCreate, db: Session = Depends(get_db)):
     
@@ -66,6 +67,11 @@ def register_user(new_user: UserCreate, db: Session = Depends(get_db)):
     
     return {"username":new_user.username}
 
+@app.get("/users/me")
+async def root(current_user: User = Depends(get_current_active_user)):
+    return current_user
+
+# Tasks
 @app.get("/tasks", response_model=list[TaskResponse])
 def get_tasks(db: Session = Depends(get_db)):
     
