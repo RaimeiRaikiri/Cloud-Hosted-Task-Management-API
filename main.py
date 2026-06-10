@@ -4,8 +4,11 @@ from datetime import datetime
 from database import session, engine
 import database_models
 from sqlalchemy.orm import Session
+from auth import router, get_password_hash
+from database import get_db
 
 app = FastAPI()
+app.include_router(router)
 
 database_models.Base.metadata.create_all(bind=engine)
 
@@ -42,14 +45,6 @@ task_two = TaskCreate(
 
 # Temp list for the tasks    
 tasks = [task_one, task_two]
-
-def get_db():
-    db = session()
-    try:
-        yield db
-    # Close the connection to db regardless of yield outcome 
-    finally:
-        db.close()
         
 # Inital testing data into db
 def init_db():
@@ -69,26 +64,28 @@ def init_db():
 
 init_db()
 
-
-
-
-@app.post("/user")
+@app.post("/users", status_code=status.HTTP_201_CREATED)
 def register_user(new_user: UserCreate, db: Session = Depends(get_db)):
-    all_users = db.query(database_models.User).all()
     
-    for user in all_users:
-        if new_user.username == user.username:
-            
-            return "Username already exists"
-        
-    # Password hashing
-    plain_new_user = new_user
-    new_user.password = "hashed password"
-    db.add(database_models.User(**new_user.model_dump()))
+    existing = db.query(database_models.User).filter(
+        database_models.User.username == new_user.username).first()
+    
+    if existing:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
+    
+    print(new_user.password)
+    hashed_password = get_password_hash(new_user.password)
+    
+    
+    db_user = UserCreate(
+        username=new_user.username,
+        password=hashed_password
+    )
+    
+    db.add(database_models.User(**db_user.model_dump()))
     db.commit()
     
-    return plain_new_user
-
+    return {"username":new_user.username}
 
 @app.get("/tasks", response_model=list[TaskResponse])
 def get_tasks(db: Session = Depends(get_db)):
