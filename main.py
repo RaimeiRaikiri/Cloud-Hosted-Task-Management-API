@@ -14,9 +14,9 @@ class TaskCreate(BaseModel):
     description: str
 
 class TaskUpdate(BaseModel):
-    title: str
-    description: str
-    completed: bool
+    title: str | None = None
+    description: str | None = None
+    completed: bool | None = None
     
 class TaskResponse(BaseModel):
     id: int
@@ -31,19 +31,13 @@ class UserCreate(BaseModel):
     username: str
     password: str
     
-task_one = Task(
-    id=5,
+task_one = TaskCreate(
     title="test1",
     description="testing time",
-    completed=False,
-    created_at=""
 )
-task_two = Task(
-    id=3,
+task_two = TaskCreate(
     title="test2",
     description="testing time",
-    completed=False,
-    created_at=""
 )
 
 # Temp list for the tasks    
@@ -65,7 +59,10 @@ def init_db():
     
     if count == 0:
         for task in tasks:
-            db.add(database_models.Task(**task.model_dump()))
+            db.add(database_models.Task(
+                **task.model_dump(),
+                completed = False
+                ))
         
         db.commit()
         db.close()
@@ -93,7 +90,7 @@ def register_user(new_user: UserCreate, db: Session = Depends(get_db)):
     return plain_new_user
 
 
-@app.get("/tasks", response_model=list[Task])
+@app.get("/tasks", response_model=list[TaskResponse])
 def get_tasks(db: Session = Depends(get_db)):
     
     number_of_tasks = db.query(database_models.Task).count()
@@ -105,7 +102,7 @@ def get_tasks(db: Session = Depends(get_db)):
     else:
         return []
     
-@app.get("/tasks/{task_id}", response_model=Task)
+@app.get("/tasks/{task_id}", response_model=TaskResponse)
 def get_task(task_id: int, db: Session = Depends(get_db)):
     task_in_db = db.query(database_models.Task).filter(database_models.Task.id == task_id).first()
     
@@ -118,23 +115,27 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
             detail=f"Task {task_id} not found"
         )
     
-@app.post("/tasks", status_code=status.HTTP_201_CREATED, response_model=Task)
-def create_task(task: Task, db: Session = Depends(get_db)):
-    db.add(database_models.Task(**task.model_dump()))
+@app.post("/tasks", status_code=status.HTTP_201_CREATED, response_model=TaskResponse)
+def create_task(task: TaskCreate, db: Session = Depends(get_db)):
+    db.add(database_models.Task(
+        **task.model_dump(),
+        completed = False
+        ))
     db.commit()
     
     return task
     
-@app.put("/tasks/{task_id}", response_model=Task)
-def update_task(task_id: int, task: Task, db: Session = Depends(get_db)):
+@app.put("/tasks/{task_id}", response_model=TaskResponse)
+def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
     try:
         task_in_db = db.query(database_models.Task).filter(database_models.Task.id == task_id).first()
         if task_in_db:
-            
-            task_in_db.title = task.title
-            task_in_db.description = task.description
-            task_in_db.completed = task.completed
-            task_in_db.created_at = task.created_at
+            if task.title:
+                task_in_db.title = task.title
+            if task.description:
+                task_in_db.description = task.description
+            if task.completed:
+                task_in_db.completed = task.completed
             
             db.commit()
             
