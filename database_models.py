@@ -15,7 +15,7 @@ class Task(Base):
    
     user_id = Column(Integer, ForeignKey("user.id"))
     
-    user = relationship("User", back_populates="user")
+    user = relationship("User", back_populates="tasks")
     
 class User(Base):
     
@@ -24,4 +24,4 @@ class User(Base):
     username = Column(String, unique=True)
     password = Column(String)
     
-    tasks = relationship("Task", back_populates="task")
+    tasks = relationship("Task", back_populates="user")
