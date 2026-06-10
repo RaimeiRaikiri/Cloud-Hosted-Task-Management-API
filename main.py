@@ -27,6 +27,9 @@ class TaskResponse(BaseModel):
     
     user_id: int|None = None
 
+class UserCreate(BaseModel):
+    username: str
+    password: str
     
 task_one = Task(
     id=5,
