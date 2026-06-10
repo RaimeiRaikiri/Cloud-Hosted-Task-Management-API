@@ -6,33 +6,12 @@ import database_models
 from sqlalchemy.orm import Session
 from auth import router, get_password_hash
 from database import get_db
+from models import UserCreate, TaskCreate, TaskResponse, TaskUpdate
 
 app = FastAPI()
 app.include_router(router)
 
 database_models.Base.metadata.create_all(bind=engine)
-
-class TaskCreate(BaseModel):
-    title: str
-    description: str
-
-class TaskUpdate(BaseModel):
-    title: str | None = None
-    description: str | None = None
-    completed: bool | None = None
-    
-class TaskResponse(BaseModel):
-    id: int
-    title: str
-    description: str
-    completed: bool
-    created_at: str | None = None
-    
-    user_id: int | None = None
-
-class UserCreate(BaseModel):
-    username: str
-    password: str
     
 task_one = TaskCreate(
     title="test1",
