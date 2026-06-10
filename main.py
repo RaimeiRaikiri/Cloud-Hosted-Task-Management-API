@@ -9,12 +9,24 @@ app = FastAPI()
 
 database_models.Base.metadata.create_all(bind=engine)
 
-class Task(BaseModel):
-    id: int = None
-    title: str = None
-    description: str = None
-    completed: bool = None
+class TaskCreate(BaseModel):
+    title: str
+    description: str
+
+class TaskUpdate(BaseModel):
+    title: str
+    description: str
+    completed: bool
+    
+class TaskResponse(BaseModel):
+    id: int
+    title: str
+    description: str
+    completed: bool
     created_at: str|None = None
+    
+    user_id: int|None = None
+
     
 task_one = Task(
     id=5,
