@@ -72,6 +72,27 @@ def init_db():
 
 init_db()
 
+
+
+
+@app.post("/user")
+def register_user(new_user: UserCreate, db: Session = Depends(get_db)):
+    all_users = db.query(database_models.User).all()
+    
+    for user in all_users:
+        if new_user.username == user.username:
+            
+            return "Username already exists"
+        
+    # Password hashing
+    plain_new_user = new_user
+    new_user.password = "hashed password"
+    db.add(database_models.User(**new_user.model_dump()))
+    db.commit()
+    
+    return plain_new_user
+
+
 @app.get("/tasks", response_model=list[Task])
 def get_tasks(db: Session = Depends(get_db)):
     
