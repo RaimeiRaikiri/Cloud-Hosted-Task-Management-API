@@ -4,6 +4,7 @@ from datetime import datetime
 from database import session, engine
 import database_models
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from auth import router, get_password_hash, get_current_active_user
 from database import get_db
 from models import UserCreate, TaskCreate, TaskResponse, TaskUpdate, User
@@ -91,18 +92,23 @@ def get_tasks(db: Session = Depends(get_db), current_user: User = Depends(get_cu
 def get_task(task_id: int,
              db: Session = Depends(get_db),
              current_user: User = Depends(get_current_active_user)):
-    task_in_db = db.query(database_models.Task).filter(
-        database_models.Task.id == task_id,
-        database_models.Task.user_id == current_user.id).first()
     
-    if task_in_db:
-        
-        return task_in_db
-    else:
+    task_in_db = db.query(database_models.Task).filter(
+        database_models.Task.id == task_id).first()
+    
+    if not task_in_db:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Task {task_id} not found"
         )
+        
+    if task_in_db.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not allowed access to this task"
+        )
+        
+    return task_in_db
     
 @app.post("/tasks", status_code=status.HTTP_201_CREATED, response_model=TaskResponse)
 def create_task(task: TaskCreate,
@@ -115,58 +121,76 @@ def create_task(task: TaskCreate,
         user_id = current_user.id
         )
     
-    db.add(new_task)
-    db.commit()
+    try:
+        db.add(new_task)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid task data"
+        )
     
     db.refresh(new_task)
     
-    response = TaskResponse.model_validate(new_task)
-    
-    return response
+    return TaskResponse.model_validate(new_task)
     
 @app.put("/tasks/{task_id}", response_model=TaskResponse)
 def update_task(task_id: int,
                 task: TaskUpdate,
                 db: Session = Depends(get_db),
                 current_user: User = Depends(get_current_active_user)):
-    try:
-        task_in_db = db.query(database_models.Task).filter(
-            database_models.Task.id == task_id,
-            database_models.Task.user_id == current_user.id).first()
-        
-        if task_in_db:
-            if task.title:
-                task_in_db.title = task.title
-            if task.description:
-                task_in_db.description = task.description
-            if task.completed:
-                task_in_db.completed = task.completed
-            
-            db.commit()
-            
-            return task_in_db
-            
-    except:
+
+    task_in_db = db.query(database_models.Task).filter(
+        database_models.Task.id == task_id).first()
+    
+    if not task_in_db:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Task {task_id} not found"
         )
+    
+    if task_in_db.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not allowed to update this task"
+        )
+
+    if task.title:
+        task_in_db.title = task.title
+    if task.description:
+        task_in_db.description = task.description
+    if task.completed:
+        task_in_db.completed = task.completed
+    
+    db.commit()
+    
+    return task_in_db
+            
+
     
 @app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(task_id: int,
                 db: Session = Depends(get_db),
                 current_user: User = Depends(get_current_active_user)):
-    try:
-        task_in_db = db.query(database_models.Task).filter(
-            database_models.Task.id == task_id,
-            database_models.Task.user_id == current_user.id).first()
-        if task_in_db:
-            db.delete(task_in_db)
-            db.commit()
-            
-            return None
-    except:
+
+    task_in_db = db.query(database_models.Task).filter(
+        database_models.Task.id == task_id).first()
+    
+    if not task_in_db:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Task {task_id} not found"
         )
+    
+    if task_in_db.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not allowed to delete this task"
+        )
+
+    db.delete(task_in_db)
+    db.commit()
+        
+    return None
+    
