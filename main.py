@@ -88,7 +88,9 @@ def get_tasks(db: Session = Depends(get_db), current_user: User = Depends(get_cu
         return []
     
 @app.get("/tasks/{task_id}", response_model=TaskResponse)
-def get_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
+def get_task(task_id: int,
+             db: Session = Depends(get_db),
+             current_user: User = Depends(get_current_active_user)):
     task_in_db = db.query(database_models.Task).filter(
         database_models.Task.id == task_id,
         database_models.Task.user_id == current_user.id).first()
@@ -103,7 +105,9 @@ def get_task(task_id: int, db: Session = Depends(get_db), current_user: User = D
         )
     
 @app.post("/tasks", status_code=status.HTTP_201_CREATED, response_model=TaskResponse)
-def create_task(task: TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
+def create_task(task: TaskCreate,
+                db: Session = Depends(get_db),
+                current_user: User = Depends(get_current_active_user)):
     
     new_task = database_models.Task( 
         **task.model_dump(),
@@ -121,7 +125,10 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db), current_user: U
     return response
     
 @app.put("/tasks/{task_id}", response_model=TaskResponse)
-def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
+def update_task(task_id: int,
+                task: TaskUpdate,
+                db: Session = Depends(get_db),
+                current_user: User = Depends(get_current_active_user)):
     try:
         task_in_db = db.query(database_models.Task).filter(
             database_models.Task.id == task_id,
@@ -146,7 +153,9 @@ def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db), c
         )
     
 @app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
+def delete_task(task_id: int,
+                db: Session = Depends(get_db),
+                current_user: User = Depends(get_current_active_user)):
     try:
         task_in_db = db.query(database_models.Task).filter(
             database_models.Task.id == task_id,
