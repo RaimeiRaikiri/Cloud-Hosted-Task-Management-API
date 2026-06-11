@@ -74,20 +74,24 @@ async def root(current_user: User = Depends(get_current_active_user)):
 
 # Tasks
 @app.get("/tasks", response_model=list[TaskResponse])
-def get_tasks(db: Session = Depends(get_db)):
-    
-    number_of_tasks = db.query(database_models.Task).count()
+def get_tasks(db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
+    # Number of tasks of a given current user
+    number_of_tasks = db.query(database_models.Task).filter(
+        database_models.Task.user_id == current_user.id).count()
     
     if number_of_tasks > 0:
-        db_tasks = db.query(database_models.Task).all()
+        db_tasks = db.query(database_models.Task).filter(
+        database_models.Task.user_id == current_user.id).all()
         
         return db_tasks
     else:
         return []
     
 @app.get("/tasks/{task_id}", response_model=TaskResponse)
-def get_task(task_id: int, db: Session = Depends(get_db)):
-    task_in_db = db.query(database_models.Task).filter(database_models.Task.id == task_id).first()
+def get_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
+    task_in_db = db.query(database_models.Task).filter(
+        database_models.Task.id == task_id,
+        database_models.Task.user_id == current_user.id).first()
     
     if task_in_db:
         
@@ -117,9 +121,12 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db), current_user: U
     return response
     
 @app.put("/tasks/{task_id}", response_model=TaskResponse)
-def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
+def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
     try:
-        task_in_db = db.query(database_models.Task).filter(database_models.Task.id == task_id).first()
+        task_in_db = db.query(database_models.Task).filter(
+            database_models.Task.id == task_id,
+            database_models.Task.user_id == current_user.id).first()
+        
         if task_in_db:
             if task.title:
                 task_in_db.title = task.title
@@ -139,9 +146,11 @@ def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
         )
     
 @app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(task_id: int, db: Session = Depends(get_db)):
+def delete_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
     try:
-        task_in_db = db.query(database_models.Task).filter(database_models.Task.id == task_id).first()
+        task_in_db = db.query(database_models.Task).filter(
+            database_models.Task.id == task_id,
+            database_models.Task.user_id == current_user.id).first()
         if task_in_db:
             db.delete(task_in_db)
             db.commit()
