@@ -99,14 +99,22 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
         )
     
 @app.post("/tasks", status_code=status.HTTP_201_CREATED, response_model=TaskResponse)
-def create_task(task: TaskCreate, db: Session = Depends(get_db)):
-    db.add(database_models.Task(
+def create_task(task: TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
+    
+    new_task = database_models.Task( 
         **task.model_dump(),
-        completed = False
-        ))
+        completed = False,
+        user_id = current_user.id
+        )
+    
+    db.add(new_task)
     db.commit()
     
-    return task
+    db.refresh(new_task)
+    
+    response = TaskResponse.model_validate(new_task)
+    
+    return response
     
 @app.put("/tasks/{task_id}", response_model=TaskResponse)
 def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db)):
