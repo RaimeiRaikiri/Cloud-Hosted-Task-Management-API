@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 # For main.py
 class TaskCreate(BaseModel):
@@ -18,6 +18,8 @@ class TaskResponse(BaseModel):
     created_at: str | None = None
     
     user_id: int | None = None
+    
+    model_config = ConfigDict(from_attributes=True)
 
 class UserCreate(BaseModel):
     username: str
