@@ -22,6 +22,7 @@ class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True)
+    email = Column(String, unique=True)
     password = Column(String)
     
     tasks = relationship("Task", back_populates="user")

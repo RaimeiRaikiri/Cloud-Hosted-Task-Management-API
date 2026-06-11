@@ -21,6 +21,7 @@ class TaskResponse(BaseModel):
 
 class UserCreate(BaseModel):
     username: str
+    email: str
     password: str
 
 
@@ -37,4 +38,5 @@ class User(BaseModel):
     disabled: bool | None = None
     
 class UserInDb(User):
+    id: int
     password: str
