@@ -40,7 +40,7 @@ def get_user(username: str, db: db_dependency):
         database_models.User.username == username).first()
 
     if user:
-        return UserInDb(**user.__dict__)
+        return UserInDb.model_validate(user)
 
         
 def authenticate_user(username: str, password: str, db: db_dependency):

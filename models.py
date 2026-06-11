@@ -42,3 +42,5 @@ class User(BaseModel):
 class UserInDb(User):
     id: int
     password: str
+    
+    model_config = ConfigDict(from_attributes=True)
