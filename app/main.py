@@ -45,6 +45,8 @@ def init_db():
         
         db.commit()
         db.close()
+    
+    db.close()
 
 init_db()
 
