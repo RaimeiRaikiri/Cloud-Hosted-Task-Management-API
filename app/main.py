@@ -1,13 +1,13 @@
 from fastapi import FastAPI, HTTPException, status, Depends
 from pydantic import BaseModel
 from datetime import datetime
-from database import session, engine
-import database_models
+from app.database import session, engine
+import app.database_models as database_models
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from auth import router, get_password_hash, get_current_active_user
-from database import get_db
-from models import UserCreate, TaskCreate, TaskResponse, TaskUpdate, User
+from app.auth import router, get_password_hash, get_current_active_user
+from app.database import get_db
+from app.models import UserCreate, TaskCreate, TaskResponse, TaskUpdate, User
 from typing import Annotated
 
 app = FastAPI()
