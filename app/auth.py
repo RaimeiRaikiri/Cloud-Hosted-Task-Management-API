@@ -4,13 +4,13 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from jose import jwt, JWTError
 from passlib.context import CryptContext 
-from database import get_db
+from app.database import get_db
 from sqlalchemy.orm import Session
-import database_models
+import app.database_models as database_models
 import os
 from dotenv import load_dotenv
 from typing import Annotated
-from models import User, UserInDb, Token, TokenData
+from app.models import User, UserInDb, Token, TokenData
 
 load_dotenv()
 
