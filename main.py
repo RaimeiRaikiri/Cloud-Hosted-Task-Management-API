@@ -8,12 +8,16 @@ from sqlalchemy.exc import IntegrityError
 from auth import router, get_password_hash, get_current_active_user
 from database import get_db
 from models import UserCreate, TaskCreate, TaskResponse, TaskUpdate, User
+from typing import Annotated
 
 app = FastAPI()
 app.include_router(router)
 
 database_models.Base.metadata.create_all(bind=engine)
     
+current_user = Annotated[User, Depends(get_current_active_user)]
+db = Annotated[Session, Depends(get_db)]
+
 task_one = TaskCreate(
     title="test1",
     description="testing time",
@@ -46,7 +50,7 @@ init_db()
 
 # Users
 @app.post("/users", status_code=status.HTTP_201_CREATED)
-def register_user(new_user: UserCreate, db: Session = Depends(get_db)):
+def register_user(new_user: UserCreate, db: db):
     
     existing = db.query(database_models.User).filter(
         database_models.User.username == new_user.username).first()
@@ -70,12 +74,12 @@ def register_user(new_user: UserCreate, db: Session = Depends(get_db)):
     return {"username":new_user.username}
 
 @app.get("/users/me")
-async def root(current_user: User = Depends(get_current_active_user)):
+async def root(current_user: current_user):
     return current_user
 
 # Tasks
 @app.get("/tasks", response_model=list[TaskResponse])
-def get_tasks(db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)):
+def get_tasks(db: db, current_user: current_user):
     # Number of tasks of a given current user
     number_of_tasks = db.query(database_models.Task).filter(
         database_models.Task.user_id == current_user.id).count()
@@ -90,8 +94,8 @@ def get_tasks(db: Session = Depends(get_db), current_user: User = Depends(get_cu
     
 @app.get("/tasks/{task_id}", response_model=TaskResponse)
 def get_task(task_id: int,
-             db: Session = Depends(get_db),
-             current_user: User = Depends(get_current_active_user)):
+             db: db,
+             current_user: current_user):
     
     task_in_db = db.query(database_models.Task).filter(
         database_models.Task.id == task_id).first()
@@ -112,8 +116,8 @@ def get_task(task_id: int,
     
 @app.post("/tasks", status_code=status.HTTP_201_CREATED, response_model=TaskResponse)
 def create_task(task: TaskCreate,
-                db: Session = Depends(get_db),
-                current_user: User = Depends(get_current_active_user)):
+                db: db,
+                current_user: current_user):
     
     new_task = database_models.Task( 
         **task.model_dump(),
@@ -138,8 +142,8 @@ def create_task(task: TaskCreate,
 @app.put("/tasks/{task_id}", response_model=TaskResponse)
 def update_task(task_id: int,
                 task: TaskUpdate,
-                db: Session = Depends(get_db),
-                current_user: User = Depends(get_current_active_user)):
+                db: db,
+                current_user: current_user):
 
     task_in_db = db.query(database_models.Task).filter(
         database_models.Task.id == task_id).first()
@@ -171,8 +175,8 @@ def update_task(task_id: int,
     
 @app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(task_id: int,
-                db: Session = Depends(get_db),
-                current_user: User = Depends(get_current_active_user)):
+                db: db,
+                current_user: current_user):
 
     task_in_db = db.query(database_models.Task).filter(
         database_models.Task.id == task_id).first()
