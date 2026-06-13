@@ -56,3 +56,18 @@ def token(test_client: TestClient, user):
         )
     
     return response.json()["access_token"]
+
+@pytest.fixture
+def task(test_client: TestClient, token):
+    response = test_client.post(
+        "/tasks", 
+        json={
+            "title":"test",
+            "description":"task tester"
+        },
+        headers={
+            "Authorization": f"Bearer {token}"
+        }
+        )
+    
+    return response.json()
