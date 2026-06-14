@@ -6,8 +6,9 @@ import app.database_models as database_models
 import pytest
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from app.models import UserCreate
+from app.models import UserCreate, TaskCreate
 from fastapi import Depends
+from app.auth import get_password_hash
 
 import os
 from dotenv import load_dotenv
@@ -30,6 +31,12 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 @pytest.fixture
+def db():
+    session = Testing_Session_Local()
+    yield session
+    session.close()
+    
+@pytest.fixture
 def test_client():
     Base.metadata.create_all(bind=engine)
     yield TestClient(app)
@@ -37,13 +44,17 @@ def test_client():
     
 @pytest.fixture
 def user(test_client: TestClient):
-    response = test_client.post("/users", json={
-        "username":"test",
-        "email":"test@gmail.com",
-        "password":"password"
-    })
+    test_user = UserCreate(
+        username="test",
+        email="test@gmail.com",
+        password=get_password_hash("password")
+    )
 
-    return response.json()
+    db.add(test_user)
+    db.commit()
+    db.refresh(test_user)
+    
+    return test_user
 
 @pytest.fixture
 def token(test_client: TestClient, user):
@@ -58,16 +69,16 @@ def token(test_client: TestClient, user):
     return response.json()["access_token"]
 
 @pytest.fixture
-def task(test_client: TestClient, token):
-    response = test_client.post(
-        "/tasks", 
-        json={
-            "title":"test",
-            "description":"task tester"
-        },
-        headers={
-            "Authorization": f"Bearer {token}"
-        }
-        )
+def task(test_client: TestClient, user):
+    test_task = database_models.Task(
+        title="test",
+        description="task tester",
+        completed = False,
+        user_id = user.id
+    )
     
-    return response.json()
+    db.add(test_task)
+    db.commit()
+    db.refresh(test_task)
+
+    return test_task
