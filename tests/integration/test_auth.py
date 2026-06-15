@@ -31,4 +31,36 @@ def test_access_token_unauthorized(test_client: TestClient):
     
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     
+def test_create_user(test_client: TestClient):
+    response = test_client.post(
+        "/users",
+        json={
+            "username":"create_user_test",
+            "email":"testing@gmail.com",
+            "password":"password"
+        })
     
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()["username"] == "create_user_test"
+    
+def test_create_user_conflict_username(test_client: TestClient, user):
+    response = test_client.post(
+        "/users", 
+        json={
+            "username":"test",
+            "email":"testing@gmail.com",
+            "password":"password"
+        })
+    
+    assert response.status_code == status.HTTP_409_CONFLICT
+    
+def test_create_user_conflict_email(test_client: TestClient, user):
+    response = test_client.post(
+        "/users", 
+        json={
+            "username":"create_user_test",
+            "email":"test@gmail.com",
+            "password":"password"
+        })
+    
+    assert response.status_code == status.HTTP_409_CONFLICT
