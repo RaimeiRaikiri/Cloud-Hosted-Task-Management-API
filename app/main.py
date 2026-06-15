@@ -18,37 +18,6 @@ database_models.Base.metadata.create_all(bind=engine)
 current_user = Annotated[User, Depends(get_current_active_user)]
 db = Annotated[Session, Depends(get_db)]
 
-task_one = TaskCreate(
-    title="test1",
-    description="testing time",
-)
-task_two = TaskCreate(
-    title="test2",
-    description="testing time",
-)
-
-# Temp list for the tasks    
-tasks = [task_one, task_two]
-        
-# Inital testing data into db
-def init_db():
-    db = session()
-    
-    count = db.query(database_models.Task).count()
-    
-    if count == 0:
-        for task in tasks:
-            db.add(database_models.Task(
-                **task.model_dump(),
-                completed = False
-                ))
-        
-        db.commit()
-        db.close()
-    
-    db.close()
-
-init_db()
 
 # Users
 @app.post("/users", status_code=status.HTTP_201_CREATED)
