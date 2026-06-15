@@ -57,6 +57,20 @@ def user(test_client: TestClient, db):
     return test_user
 
 @pytest.fixture
+def second_user(test_client: TestClient, db):
+    test_user = database_models.User(
+        username="testtwo",
+        email="testtwo@gmail.com",
+        password=get_password_hash("password")
+    )
+
+    db.add(test_user)
+    db.commit()
+    db.refresh(test_user)
+    
+    return test_user
+
+@pytest.fixture
 def token(test_client: TestClient, user):
     response = test_client.post(
         "/auth/token",
@@ -75,6 +89,21 @@ def task(test_client: TestClient, user, db):
         description="task tester",
         completed = False,
         user_id = user.id
+    )
+    
+    db.add(test_task)
+    db.commit()
+    db.refresh(test_task)
+
+    return test_task
+
+@pytest.fixture
+def second_user_task(test_client: TestClient, second_user, db):
+    test_task = database_models.Task(
+        title="testing",
+        description="task tester for user 2!",
+        completed = False,
+        user_id = second_user.id
     )
     
     db.add(test_task)
