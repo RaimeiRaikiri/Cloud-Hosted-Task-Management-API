@@ -66,7 +66,6 @@ def register_user(new_user: UserCreate, db: db):
     if existing_email:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already in use for a different user")
     
-    print(new_user.password)
     hashed_password = get_password_hash(new_user.password)
     
     
