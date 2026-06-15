@@ -43,8 +43,8 @@ def test_client():
     Base.metadata.drop_all(bind=engine)
     
 @pytest.fixture
-def user(test_client: TestClient):
-    test_user = UserCreate(
+def user(test_client: TestClient, db):
+    test_user = database_models.User(
         username="test",
         email="test@gmail.com",
         password=get_password_hash("password")
@@ -69,7 +69,7 @@ def token(test_client: TestClient, user):
     return response.json()["access_token"]
 
 @pytest.fixture
-def task(test_client: TestClient, user):
+def task(test_client: TestClient, user, db):
     test_task = database_models.Task(
         title="test",
         description="task tester",
