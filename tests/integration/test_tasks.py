@@ -2,14 +2,17 @@ from fastapi.testclient import TestClient
 from fastapi import status
 from app.database_models import Task
 
+def auth_headers(token):
+    
+    return {"Authorization":f"Bearer {token}"}
+
 # Get all tasks from current user endpoints
 
 def test_get_all_tasks(test_client: TestClient, task, token):
     
-    response = test_client.get("/tasks", headers={
-        "content-type":"application/json",
-        "Authorization":f"Bearer {token}" 
-        })
+    response = test_client.get(
+        "/tasks",
+        headers=auth_headers(token))
     
     response_json = response.json()
     
@@ -22,10 +25,9 @@ def test_get_all_tasks(test_client: TestClient, task, token):
     
 def test_get_all_tasks_empty(test_client: TestClient, token, task):
     
-    response = test_client.get("/tasks", headers={
-        "content-type":"application/json",
-        "Authorization":f"Bearer {token}" 
-        })
+    response = test_client.get(
+        "/tasks",
+        headers=auth_headers(token))
     
     response_json = response.json()
     
@@ -45,9 +47,8 @@ def test_get_task_by_id(test_client: TestClient, token, task):
     
     response = test_client.get(
         f"/tasks/{task.id}",
-        headers={
-            "Authorization":f"Bearer {token}"
-        }  )
+        headers=auth_headers(token)
+        )
     response_json = response.json()
 
     assert isinstance(response_json, dict)
@@ -63,9 +64,8 @@ def test_get_task_by_id_not_found(test_client: TestClient, token):
     
     response = test_client.get(
         "tasks/99999",
-        headers={
-            "Authorization": f"Bearer {token}"
-        })
+        headers=auth_headers(token)
+        )
     
     assert response.status_code == status.HTTP_404_NOT_FOUND
     
@@ -77,9 +77,8 @@ def test_get_task_by_id_forbidden(
     
     response = test_client.get(
         f"tasks/{second_user_task.id}",
-        headers={
-            "Authorization": f"Bearer {token}"
-        } )
+        headers=auth_headers(token)
+        )
     
     assert response.status_code == status.HTTP_403_FORBIDDEN
     
