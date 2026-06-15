@@ -166,7 +166,7 @@ def update_task(task_id: int,
         task_in_db.title = task.title
     if task.description:
         task_in_db.description = task.description
-    if task.completed:
+    if task.completed is not None:
         task_in_db.completed = task.completed
     
     db.commit()
