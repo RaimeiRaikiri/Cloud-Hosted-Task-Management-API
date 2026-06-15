@@ -54,11 +54,17 @@ init_db()
 @app.post("/users", status_code=status.HTTP_201_CREATED)
 def register_user(new_user: UserCreate, db: db):
     
-    existing = db.query(database_models.User).filter(
+    existing_username = db.query(database_models.User).filter(
         database_models.User.username == new_user.username).first()
     
-    if existing:
+    if existing_username:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
+    
+    existing_email = db.query(database_models.User).filter(
+        database_models.User.email == new_user.email).first()
+    
+    if existing_email:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already in use for a different user")
     
     print(new_user.password)
     hashed_password = get_password_hash(new_user.password)
