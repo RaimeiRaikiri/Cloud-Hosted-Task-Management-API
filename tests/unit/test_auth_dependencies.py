@@ -3,7 +3,7 @@ from app.auth import get_password_hash, verify_password, create_access_token
 from datetime import timedelta
 import os 
 from dotenv import load_dotenv
-import jwt
+from jose import jwt
 
 load_dotenv()
 
