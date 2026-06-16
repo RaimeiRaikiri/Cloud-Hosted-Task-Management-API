@@ -5,11 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-db_password = os.getenv("postgres_password")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-db_url = f"postgresql://postgres:{db_password}@localhost:5432/taskdb"
-
-engine = create_engine(db_url)
+engine = create_engine(DATABASE_URL)
 
 session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
