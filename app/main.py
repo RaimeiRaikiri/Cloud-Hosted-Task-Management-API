@@ -13,7 +13,9 @@ from typing import Annotated
 app = FastAPI()
 app.include_router(router)
 
-database_models.Base.metadata.create_all(bind=engine)
+@app.on_event("startup")
+def startup(): 
+    database_models.Base.metadata.create_all(bind=engine)
     
 current_user = Annotated[User, Depends(get_current_active_user)]
 db = Annotated[Session, Depends(get_db)]
