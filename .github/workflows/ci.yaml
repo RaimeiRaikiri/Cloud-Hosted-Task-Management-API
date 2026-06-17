@@ -2,38 +2,51 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
 
 jobs:
-  run_tests:
-    strategy:
-      fail_fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version:
-          - "3.7"
-          - "3.8"
-          - "3.9"
-          - "3.10"
-          - "3.11"
-          - "3.12"
-          - "3.13"
-          - "3.14"
+  test:
+  runs_on: ubuntu-latest
+  services:
+    postgres:
+      image: postgres:17
+      env:
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: ${POSTGRES_DB}
 
-      name: Test
-      runs-on: ${{ matrix.os }}
+      ports:
+        - 5432:5432
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v3
+      options: >-
+        --health-cmd pg_isready
+        --health-interval 10s
+        --health-timeout 5s 
+        --health-retries 5
 
-        - name: Set up python
-          uses: actions/setup-python@v4
-          with:
-            python-version: ${{ matrix.python-version@v4 }}
+  env:
+    DATABASE_URL: ${TEST_DATABASE_URL}
+    SECRET_KEY: ${SECRET_KEY}
+    ALGORITHM: HS256
 
-        - name: Install dependencies
-          run: python -m pip -install pytest .
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-        - name: Run tests
-          run: pytest
+    - name: Set up python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name:
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name:
+      run: |
+        pytest -v
