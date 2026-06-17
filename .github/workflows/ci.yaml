@@ -9,45 +9,45 @@ on:
       - main
 
 jobs:
-test:
-runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
-services:
-  postgres:
-    image: postgres:17
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: taskdb_test
+
+        ports:
+          - 5432:5432
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s 
+          --health-retries 5
+
     env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: taskdb_test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/taskdb_test
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      ALGORITHM: HS256
 
-    ports:
-      - 5432:5432
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    options: >-
-      --health-cmd pg_isready
-      --health-interval 10s
-      --health-timeout 5s 
-      --health-retries 5
+      - name: Set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-env:
-  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/taskdb_test
-  SECRET_KEY: ${{ secrets.SECRET_KEY }}
-  ALGORITHM: HS256
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-steps:
-  - name: Checkout code
-    uses: actions/checkout@v4
-
-  - name: Set up python
-    uses: actions/setup-python@v5
-    with:
-      python-version: "3.12"
-
-  - name: Install dependencies
-    run: |
-      python -m pip install --upgrade pip
-      pip install -r requirements.txt
-
-  - name: Run pytest
-    run: |
-      pytest -v
+      - name: Run pytest
+        run: |
+          pytest -v
