@@ -15,10 +15,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-postgres_password = os.getenv("postgres_password")
-SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:{postgres_password}@localhost:5432/taskdb_test"
+TEST_DB_URL = os.getenv("TEST_DATABASE_URL")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
+engine = create_engine(TEST_DB_URL)
 Testing_Session_Local = sessionmaker(bind=engine)
 
 def override_get_db():
