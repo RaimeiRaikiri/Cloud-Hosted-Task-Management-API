@@ -20,8 +20,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
+    env_file:
+      - .env.docker
     restart: unless-stopped
 
 volumes:
