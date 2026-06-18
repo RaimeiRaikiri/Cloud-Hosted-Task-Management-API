@@ -81,7 +81,7 @@ async def get_current_user(db: db_dependency, token: str = Depends(oauth2_scheme
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
-        if username == None:
+        if username is None:
             raise credential_exception
 
         token_data = TokenData(username=username)
@@ -89,7 +89,7 @@ async def get_current_user(db: db_dependency, token: str = Depends(oauth2_scheme
         raise credential_exception
 
     user = get_user(username=token_data.username, db=db)
-    if user == None:
+    if user is None:
         raise credential_exception
 
     return user

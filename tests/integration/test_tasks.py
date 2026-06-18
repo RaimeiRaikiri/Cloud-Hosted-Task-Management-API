@@ -138,7 +138,7 @@ def test_update_task_by_id(test_client: TestClient, token, task, db):
     assert (
         updated_task.title == "updated_title"
         and updated_task.description == "updated_description"
-        and updated_task.completed == True
+        and updated_task.completed
     )
 
 
