@@ -57,4 +57,4 @@ jobs:
 
       - name: Run pytest
         run: |
-          pytest -v
+          pytest -v --cov=app --cov-report=term
