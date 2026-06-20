@@ -12,7 +12,7 @@ from app.models import TaskCreate, TaskResponse, TaskUpdate, User, UserCreate
 app = FastAPI(
     title="Task Manager API",
     description="Task Management API with JWT authentication",
-    version="1.0.0"
+    version="1.0.0",
 )
 app.include_router(router)
 
