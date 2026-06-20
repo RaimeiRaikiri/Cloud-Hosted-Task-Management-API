@@ -9,7 +9,11 @@ from app.auth import get_current_active_user, get_password_hash, router
 from app.database import engine, get_db
 from app.models import TaskCreate, TaskResponse, TaskUpdate, User, UserCreate
 
-app = FastAPI()
+app = FastAPI(
+    title="Task Manager API",
+    description="Task Management API with JWT authentication",
+    version="1.0.0"
+)
 app.include_router(router)
 
 
