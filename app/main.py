@@ -20,3 +20,7 @@ app.include_router(users.router)
 @app.on_event("startup")
 def startup():
     database_models.Base.metadata.create_all(bind=engine)
+    
+@app.get("/")
+def root():
+    return {"version": "1.0.1"}
