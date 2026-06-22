@@ -4,7 +4,7 @@ from datetime import timedelta
 from dotenv import load_dotenv
 from jose import jwt
 
-from app.auth import create_access_token, get_password_hash, verify_password
+from app.routers.auth import create_access_token, get_password_hash, verify_password
 
 load_dotenv()
 

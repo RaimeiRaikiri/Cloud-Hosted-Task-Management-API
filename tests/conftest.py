@@ -7,10 +7,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 import app.database_models as database_models
-from app.auth import get_password_hash
 from app.database import get_db
 from app.database_models import Base
 from app.main import app
+from app.routers.auth import get_password_hash
 
 load_dotenv()
 
