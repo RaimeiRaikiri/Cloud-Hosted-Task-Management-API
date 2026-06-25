@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timezone
 
 import pytest
 from dotenv import load_dotenv
@@ -88,7 +89,11 @@ def token(test_client: TestClient, user):
 @pytest.fixture
 def task(test_client: TestClient, user, db):
     test_task = database_models.Task(
-        title="test", description="task tester", completed=False, user_id=user.id
+        title="test",
+        description="task tester",
+        completed=False,
+        user_id=user.id,
+        created_at=datetime.now(timezone.utc),
     )
 
     db.add(test_task)
@@ -105,6 +110,7 @@ def second_user_task(test_client: TestClient, second_user, db):
         description="task tester for user 2!",
         completed=False,
         user_id=second_user.id,
+        created_at=datetime.now(timezone.utc),
     )
 
     db.add(test_task)

@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -63,7 +64,10 @@ def get_task(task_id: int, db: db, current_user: current_user):
 def create_task(task: TaskCreate, db: db, current_user: current_user):
 
     new_task = database_models.Task(
-        **task.model_dump(), completed=False, user_id=current_user.id
+        **task.model_dump(),
+        completed=False,
+        user_id=current_user.id,
+        created_at=datetime.now(timezone.utc),
     )
 
     try:

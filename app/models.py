@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -18,7 +20,7 @@ class TaskResponse(BaseModel):
     title: str
     description: str
     completed: bool
-    created_at: str | None = None
+    created_at: datetime
 
     user_id: int | None = None
 

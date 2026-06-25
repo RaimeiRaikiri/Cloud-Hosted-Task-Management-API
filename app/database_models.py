@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -11,7 +11,7 @@ class Task(Base):
     title = Column(String)
     description = Column(String)
     completed = Column(Boolean)
-    created_at = Column(String)
+    created_at = Column(DateTime(timezone=True))
 
     user_id = Column(Integer, ForeignKey("user.id"))
 
