@@ -35,7 +35,7 @@ def test_create_user(test_client: TestClient):
         "/users",
         json={
             "username": "create_user_test",
-            "email": "testing@gmail.com",
+            "email": "mikescutts10@gmail.com",
             "password": "password",
         },
     )

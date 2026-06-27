@@ -11,7 +11,7 @@ def test_user_CRUD_lifecycle(test_client: TestClient):
     # Create user
     response = test_client.post(
         "/users/",
-        json={"username": "Jake", "email": "jake@gmail.com", "password": "password"},
+        json={"username": "Jake", "email": "mikescutts10@gmail.com", "password": "password"},
     )
 
     assert response.status_code == status.HTTP_201_CREATED
