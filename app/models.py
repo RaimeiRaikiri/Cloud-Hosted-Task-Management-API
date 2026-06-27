@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
 
 # For main.py
@@ -28,9 +28,15 @@ class TaskResponse(BaseModel):
 
 
 class UserCreate(BaseModel):
-    username: str
-    email: str
-    password: str
+    username: str = Field(
+        min_length=3,
+        max_length=30
+    )
+    email: EmailStr
+    password: str = Field(
+        min_length=8,
+        max_length=30
+    )
 
 
 # For Auth
