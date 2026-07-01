@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 import app.database_models as database_models
 from app.database import get_db
-from app.models import Token, TokenData, UserInDb
+from app.models import Token, UserInDb
 
 load_dotenv()
 
@@ -87,11 +87,10 @@ async def get_current_user(db: db_dependency, token: str = Depends(oauth2_scheme
         if username is None:
             raise credential_exception
 
-        token_data = TokenData(username=username)
     except JWTError:
         raise credential_exception
 
-    user = get_user(username=token_data.username, db=db)
+    user = get_user(username, db=db)
     if user is None:
         raise credential_exception
 
