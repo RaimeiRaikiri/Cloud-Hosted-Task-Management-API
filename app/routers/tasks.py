@@ -8,12 +8,12 @@ from sqlalchemy.orm import Session
 import app.database_models as database_models
 from app.database import get_db
 from app.models import TaskCreate, TaskResponse, TaskUpdate, User
-from app.routers.auth import get_current_active_user
+from app.routers.auth import get_current_user
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 db = Annotated[Session, Depends(get_db)]
-current_user = Annotated[User, Depends(get_current_active_user)]
+current_user = Annotated[User, Depends(get_current_user)]
 
 
 @router.get("/", response_model=list[TaskResponse])

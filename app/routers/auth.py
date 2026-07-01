@@ -97,13 +97,6 @@ async def get_current_user(db: db_dependency, token: str = Depends(oauth2_scheme
     return user
 
 
-async def get_current_active_user(current_user: UserInDb = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-
-    return current_user
-
-
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
     db: db_dependency, form_data: OAuth2PasswordRequestForm = Depends()
