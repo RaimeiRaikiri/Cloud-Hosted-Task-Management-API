@@ -1,5 +1,6 @@
 from fastapi import status
 from fastapi.testclient import TestClient
+from test_tasks import auth_headers
 
 BASEURL = "/auth"
 
@@ -64,3 +65,18 @@ def test_create_user_conflict_email(test_client: TestClient, user):
     )
 
     assert response.status_code == status.HTTP_409_CONFLICT
+
+
+def test_get_user(test_client: TestClient, user, token):
+    response = test_client.get("/users/me", headers=auth_headers(token))
+
+    assert response.status_code == status.HTTP_200_OK
+
+    response_json = response.json()
+    assert response_json["username"] == "test"
+
+
+def test_get_user_unauthorised(test_client: TestClient, user):
+    response = test_client.get("/users/me")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
