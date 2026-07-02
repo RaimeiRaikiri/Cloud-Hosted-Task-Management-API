@@ -54,5 +54,5 @@ def register_user(new_user: UserCreate, db: db):
 
 
 @router.get("/me")
-async def root(current_user: current_user):
+def root(current_user: current_user):
     return current_user
