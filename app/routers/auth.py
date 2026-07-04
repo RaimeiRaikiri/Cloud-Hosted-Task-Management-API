@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 import app.database_models as database_models
 from app.database import get_db
-from app.models import Token, UserInDb, CurrentUser
+from app.models import CurrentUser, Token, UserInDb
 
 load_dotenv()
 
