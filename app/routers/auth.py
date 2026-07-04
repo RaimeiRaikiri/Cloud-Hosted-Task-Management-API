@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 import app.database_models as database_models
 from app.database import get_db
-from app.models import Token, UserInDb
+from app.models import Token, UserInDb, CurrentUser
 
 load_dotenv()
 
@@ -94,7 +94,7 @@ async def get_current_user(db: db_dependency, token: str = Depends(oauth2_scheme
     if user is None:
         raise credential_exception
 
-    return user
+    return CurrentUser(id=user.id, username=user.username)
 
 
 @router.post("/token", response_model=Token)

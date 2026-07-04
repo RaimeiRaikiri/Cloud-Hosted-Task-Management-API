@@ -5,13 +5,13 @@ from sqlalchemy.orm import Session
 
 import app.database_models as database_models
 from app.database import get_db
-from app.models import User, UserCreate
+from app.models import CurrentUser, UserCreate
 from app.routers.auth import get_current_user, get_password_hash
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 db = Annotated[Session, Depends(get_db)]
-current_user = Annotated[User, Depends(get_current_user)]
+current_user = Annotated[CurrentUser, Depends(get_current_user)]
 
 
 # Users
@@ -53,6 +53,6 @@ def register_user(new_user: UserCreate, db: db):
     return {"username": new_user.username}
 
 
-@router.get("/me")
+@router.get("/me", response_model=CurrentUser)
 def root(current_user: current_user):
-    return current_user
+    return current_user.model_validate(current_user)

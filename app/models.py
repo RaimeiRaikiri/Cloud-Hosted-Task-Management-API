@@ -26,13 +26,6 @@ class TaskResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
-class UserCreate(BaseModel):
-    username: str = Field(min_length=3, max_length=30)
-    email: EmailStr
-    password: str = Field(min_length=8)
-
-
 # For Auth
 class Token(BaseModel):
     access_token: str
@@ -42,10 +35,19 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: str | None = None
 
-
 class User(BaseModel):
     username: str
-
+    
+class UserCreate(BaseModel):
+    username: str = Field(min_length=3, max_length=30)
+    email: EmailStr
+    password: str = Field(min_length=8)
+    
+class CurrentUser(User):
+    id: int
+    username: str
+    
+    model_config = ConfigDict(from_attributes=True)
 
 class UserInDb(User):
     id: int
